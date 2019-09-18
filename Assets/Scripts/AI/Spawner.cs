@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿    using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -59,6 +59,17 @@ public class Spawner : MonoBehaviour
             SpawnRow();
         }
 
+    }
+
+    public void Spawn()
+    {
+        for (int i = 0; i < rowAmount; i++)
+        {
+            rowNumber = i;
+            rowNumber++;
+
+            SpawnRow();
+        }
     }
 
     void SpawnRow()

@@ -5,6 +5,8 @@ using UnityEngine;
 public class Enemy : MonoBehaviour, IDamagable, IPoolObject
 {
 
+    //TODO Abstract/virtual maken?
+
     [Header("Move Settings")]
     [Tooltip("The distance from the player for which it stops.")]
     public float stopDistance = 200f;
@@ -52,12 +54,12 @@ public class Enemy : MonoBehaviour, IDamagable, IPoolObject
         
         target = Player.Instance.gameObject;
 
-        attackTimer = Random.Range(waitTimeForShot.x, waitTimeForShot.y);
+        attackTimer = Random.Range(waitTimeForShot.x/4, waitTimeForShot.y/2);
 
         sideStartPosition = transform.position.x;
     }
 
-    public void OnObjectSpawn()
+    public void OnObjectSpawn() 
     {
         attackTimer = Random.Range(waitTimeForShot.x, waitTimeForShot.y);
 
@@ -142,17 +144,18 @@ public class Enemy : MonoBehaviour, IDamagable, IPoolObject
 
     private void Attack()
     {
-        //yield return new WaitForSeconds(Random.Range(maxWaitTimeForShot/2, maxWaitTimeForShot));
 
         for (int i = 0; i < spawnPositions.Length; i++)
         {
             Vector3 _targetDirection = target.transform.position - spawnPositions[i].transform.position;
+            Vector3 _bulletDirection = new Vector3(spawnPositions[i].transform.forward.x, _targetDirection.y, _targetDirection.z);
+
+            Vector3[] _directions = { _targetDirection, _bulletDirection };
 
             GameObject _bulletClone = objectPool.SpawnFromPool(bulletPool, spawnPositions[i].transform.position, spawnPositions[i].transform.rotation);
             _bulletClone.GetComponent<Bullet>().bulletDamage = bulletDamage;
 
-            _bulletClone.GetComponent<Rigidbody>().AddForce(_targetDirection * bulletForce);
-
+            _bulletClone.GetComponent<Rigidbody>().AddForce(_directions[Random.Range(0, _directions.Length)] * bulletForce);
         }
 
        attackTimer = Random.Range(waitTimeForShot.x, waitTimeForShot.y);

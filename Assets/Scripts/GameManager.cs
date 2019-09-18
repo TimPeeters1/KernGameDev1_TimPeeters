@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
-[RequireComponent (typeof(ObjectPoolManager))]
+[RequireComponent(typeof(ObjectPoolManager))]
 public class GameManager : MonoBehaviour
 {
     #region Singleton
@@ -14,41 +15,65 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-
     public int highScore;
     public int score;
 
     private Player playerObject;
 
+    public GameObject DeathScreen;
+
     public List<Enemy> activeEnemies;
     public float enemySpeed;
-    public float enemySideSpeed;
 
     private void Start()
     {
-        playerObject = Player.Instance;      
+        playerObject = Player.Instance;
+
+        DeathScreen.SetActive(false);
+    }
+
+    private void Update()
+    {
+        if (activeEnemies.Count <= 0)
+        {
+            Spawner.Instance.Spawn();
+        }
     }
 
     public void IncreaseSpeed()
     {
+        //TODO Enemy increase smoothen.
+
         enemySpeed = activeEnemies[0].moveSpeed;
-        enemySideSpeed = activeEnemies[0].sideSpeed;
+        enemySpeed += 0.2f;
 
-        enemySpeed++;
-        enemySideSpeed++;
+        StartCoroutine(DoIncrease(1f, activeEnemies[0].moveSpeed, enemySpeed)); 
+    }
 
-        for (int i = 0; i < activeEnemies.Count; i++)
+    IEnumerator DoIncrease(float _overTime, float _currentValue, float _newValue)
+    {
+        float startTime = Time.time;
+
+        while(Time.time < (startTime + _overTime))
         {
-            activeEnemies[i].moveSpeed = enemySpeed;
-            activeEnemies[i].sideSpeed = enemySideSpeed;
+            for (int i = 0; i < activeEnemies.Count; i++)
+            {
+                activeEnemies[i].moveSpeed = Mathf.Lerp(_currentValue, _newValue, (Time.time - startTime) / _overTime);
+                activeEnemies[i].sideSpeed = Mathf.Lerp(_currentValue, _newValue, (Time.time - startTime) / _overTime);
+            }
+            yield return null;
         }
+
+        yield return null;
     }
 
     public void GameOver()
     {
-        Debug.Log("Game over.");
+        Player.Instance.enabled = false;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
-        //TODO game over uitwerken.
+        DeathScreen.SetActive(true);
     }
 
 }

@@ -58,7 +58,9 @@ public class Player : MonoBehaviour, IDamagable
     private ObjectPoolManager objectPool;
     [SerializeField] Pool particlePool;
 
-    private float timer;
+    float timer;
+    Camera mainCam;
+    RaycastHit _hit;
 
     private float Timer()
     {
@@ -74,13 +76,14 @@ public class Player : MonoBehaviour, IDamagable
 
     private void Start()
     {
-     
+
         objectPool = ObjectPoolManager.Instance;
 
         objectPool.AddPool(bulletPool);
-       // objectPool.AddPool(particlePool);
+        // objectPool.AddPool(particlePool);
 
-        cameraObject = GetComponentInChildren<Camera>().gameObject;
+        mainCam = GetComponentInChildren<Camera>();
+        cameraObject = mainCam.gameObject;
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -90,6 +93,7 @@ public class Player : MonoBehaviour, IDamagable
         healthBar.fillAmount = (float)health / (float)maxHealth;
 
         currentLives = maxLives;
+
     }
 
     private void Update()
@@ -99,17 +103,12 @@ public class Player : MonoBehaviour, IDamagable
 
         if (Input.GetButtonDown("Fire1") && timer <= 0)
         {
-            DoShot();   
+            DoShot();
             timer = shotTimer;
         }
 
         Timer();
-
-        //Ray ray = 
-
-
-        Debug.DrawRay(spawnPositions[0].transform.position, spawnPositions[0].transform.forward * 100, Color.green);
-        Debug.DrawRay(spawnPositions[1].transform.position, spawnPositions[1].transform.forward * 100, Color.green);
+        //Debug.DrawRay(_camRay.origin, _camRay.direction * 10000, Color.cyan);
     }
 
     private void DoMovement()
@@ -124,7 +123,7 @@ public class Player : MonoBehaviour, IDamagable
 
         //transform.position = Vector3.Lerp(transform.position, newPlayerPostion, Time.deltaTime * 0.5f);
     }
-
+        
     private void DoLookAround()
     {
         float _mouseX = Input.GetAxis("Mouse X");
@@ -141,16 +140,32 @@ public class Player : MonoBehaviour, IDamagable
 
     private void DoShot()
     {
+
+        RaycastHit _hit;
+        Ray _camRay = mainCam.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2));
+        Physics.Raycast(_camRay, out _hit);
+      
+        Vector3 _dir;
+
         for (int i = 0; i < spawnPositions.Length; i++)
         {
-            Debug.DrawRay(spawnPositions[i].transform.position, spawnPositions[i].transform.forward, Color.red);
+            //Debug.DrawRay(spawnPositions[i].transform.position, spawnPositions[i].transform.forward, Color.red);
 
             GameObject _bulletClone = objectPool.SpawnFromPool(bulletPool, spawnPositions[i].transform.position, spawnPositions[i].transform.rotation);
             _bulletClone.GetComponent<Bullet>().bulletDamage = bulletDamage;
 
-            //TODO Bullet accurate maken
-            _bulletClone.GetComponent<Rigidbody>().AddForce(spawnPositions[i].transform.forward * bulletForce);
+            if (Physics.Raycast(_camRay, out _hit, 10000f))
+            {
+                _dir = _hit.point - spawnPositions[i].transform.position;
+                //_dir = _dir.normalized;
 
+                _bulletClone.GetComponent<Rigidbody>().AddForce(_dir * bulletForce);
+            }
+            else
+            {
+                _dir = _camRay.GetPoint(2000f) - spawnPositions[i].transform.position;
+                _bulletClone.GetComponent<Rigidbody>().AddForce(_dir * bulletForce);
+            }
         }
     }
 
@@ -159,27 +174,53 @@ public class Player : MonoBehaviour, IDamagable
         if (health <= 0)
         {
             Die();
+            
         }
         else
         {
             health -= damage;
 
             healthBar.fillAmount = (float)health / (float)maxHealth;
+
+            StartCoroutine(CameraShake(.2f, .4f));
         }
     }
 
     public void Die()
     {
-        if(currentLives > 1)
+        if (currentLives > 1)
         {
             currentLives--;
             health = maxHealth;
+            healthBar.fillAmount = (float)health / (float)maxHealth;
 
             objectPool.SpawnFromPool(particlePool, transform.position, particlePool.prefab.transform.rotation);
         }
         else
         {
             GameManager.Instance.GameOver();
+            StartCoroutine(CameraShake(.5f, 1.2f));
         }
+    }
+
+    public IEnumerator CameraShake(float _duration, float _magnitude)
+    {
+        Vector3 _originalPos = cameraObject.transform.localPosition;
+
+        float _elapsed = 0.0f;
+
+        while(_elapsed < _duration)
+        {
+            float x = Random.Range(-1f, 1f) * _magnitude;
+            float y = Random.Range(-1f, 1f) * _magnitude;
+
+            cameraObject.transform.localPosition = new Vector3(_originalPos.x + x, _originalPos.y + y, _originalPos.z);
+
+            _elapsed += Time.deltaTime;
+
+            yield return null;
+        }
+
+        cameraObject.transform.localPosition = _originalPos;
     }
 }
