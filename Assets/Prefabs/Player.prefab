@@ -590,10 +590,10 @@ MonoBehaviour:
   cameraObject: {fileID: 0}
   xSensitivity: 0.7
   ySensitivity: 0.7
-  maxHorizontalRotation: {x: -75, y: 75}
+  maxHorizontalRotation: {x: -50, y: 50}
   maxVerticalRotation: {x: -80, y: 45}
   movementRestrictions: {x: -260, y: 275}
-  moveSpeed: 0.5
+  moveSpeed: 0.7
   bulletPool: {fileID: 11400000, guid: 71b818dbf4210174eb4c883fbbb8bef0, type: 2}
   bulletForce: 500
   bulletDamage: 50
@@ -601,10 +601,11 @@ MonoBehaviour:
   spawnPositions:
   - {fileID: 4861448500489978011}
   - {fileID: 4861448499359165544}
-  crosshairPosition: {fileID: 504904959}
   maxHealth: 100
   healthBar: {fileID: 0}
   maxLives: 3
+  liveCounter: {fileID: 0}
+  liveScreen: {fileID: 0}
   particlePool: {fileID: 11400000, guid: 5d5e30c423974a3438a3a5cfdf91add3, type: 2}
 --- !u!114 &1178091582
 MonoBehaviour:

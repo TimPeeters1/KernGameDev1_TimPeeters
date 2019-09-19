@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        highScore = PlayerPrefs.GetInt("Highscore", highScore);
+
         playerObject = Player.Instance;
 
         DeathScreen.SetActive(false);
@@ -89,7 +91,10 @@ public class GameManager : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
+        PlayerPrefs.SetInt("Highscore", score);
         DeathScreen.SetActive(true);
+
+        Time.timeScale = 0;
     }
 
 }

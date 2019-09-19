@@ -54,6 +54,8 @@ public class Player : MonoBehaviour, IDamagable
     int currentLives;
     [SerializeField] Text liveCounter;
 
+    [SerializeField] GameObject liveScreen;
+
     //ObjectPool
     private ObjectPoolManager objectPool;
     [SerializeField] Pool particlePool;
@@ -95,6 +97,8 @@ public class Player : MonoBehaviour, IDamagable
         currentLives = maxLives;
 
         liveCounter.text = "Lives: " + currentLives;
+
+        liveScreen.SetActive(false);
 
     }
 
@@ -173,6 +177,8 @@ public class Player : MonoBehaviour, IDamagable
 
     public void Damage(int damage)
     {
+        health -= damage;
+
         if (health <= 0)
         {
             Die();
@@ -180,8 +186,6 @@ public class Player : MonoBehaviour, IDamagable
         }
         else
         {
-            health -= damage;
-
             healthBar.fillAmount = (float)health / (float)maxHealth;
 
             StartCoroutine(CameraShake(.2f, .4f));
@@ -190,6 +194,7 @@ public class Player : MonoBehaviour, IDamagable
 
     public void Die()
     {
+
         if (currentLives > 1)
         {
             currentLives--;
@@ -197,12 +202,35 @@ public class Player : MonoBehaviour, IDamagable
             healthBar.fillAmount = (float)health / (float)maxHealth;
 
             objectPool.SpawnFromPool(particlePool, transform.position, particlePool.prefab.transform.rotation);
+            StartCoroutine(Respawn());
         }
         else
         {
-            GameManager.Instance.GameOver();
+            liveCounter.text = "Lives: " + currentLives.ToString();
+            healthBar.fillAmount = (float)health / (float)maxHealth;
+
             StartCoroutine(CameraShake(.5f, 1.2f));
+
+            GameManager.Instance.GameOver();
+            
         }
+    }
+
+    IEnumerator Respawn()
+    {
+        StartCoroutine(CameraShake(.5f, 1f));
+        liveScreen.SetActive(true);
+
+        Time.timeScale = 0;
+
+        liveCounter.transform.localScale = Vector3.one * 5f;
+
+        yield return new WaitForSecondsRealtime(2);
+
+        Time.timeScale = 1;
+        liveCounter.transform.localScale = Vector3.one;
+        liveScreen.SetActive(false);
+
     }
 
     public IEnumerator CameraShake(float _duration, float _magnitude)
