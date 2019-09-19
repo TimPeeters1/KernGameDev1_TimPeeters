@@ -44,7 +44,6 @@ public class Player : MonoBehaviour, IDamagable
     [Space]
     [Tooltip("Spawn positions of bullets (e.g. the position where the bullets come out of the rifle.")]
     [SerializeField] GameObject[] spawnPositions;
-    [SerializeField] GameObject crosshairPosition;
 
     [Space]
     [Header("Health Settings")]
@@ -53,6 +52,7 @@ public class Player : MonoBehaviour, IDamagable
     [SerializeField] Image healthBar;
     [SerializeField] int maxLives;
     int currentLives;
+    [SerializeField] Text liveCounter;
 
     //ObjectPool
     private ObjectPoolManager objectPool;
@@ -93,6 +93,8 @@ public class Player : MonoBehaviour, IDamagable
         healthBar.fillAmount = (float)health / (float)maxHealth;
 
         currentLives = maxLives;
+
+        liveCounter.text = "Lives: " + currentLives;
 
     }
 
@@ -174,7 +176,7 @@ public class Player : MonoBehaviour, IDamagable
         if (health <= 0)
         {
             Die();
-            
+            liveCounter.text = "Lives: " + currentLives.ToString();
         }
         else
         {

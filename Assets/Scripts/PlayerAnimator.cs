@@ -7,7 +7,6 @@ public class PlayerAnimator : MonoBehaviour
     Player player;
     Camera mainCam;
 
-
     [SerializeField] Transform horizontalTurret;
     [SerializeField] Transform verticalTurret;
 

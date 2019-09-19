@@ -25,6 +25,11 @@ public class GameManager : MonoBehaviour
     public List<Enemy> activeEnemies;
     public float enemySpeed;
 
+    public Text scoreText;
+    public Text highscoreText;
+
+    public float minDistance;
+
     private void Start()
     {
         playerObject = Player.Instance;
@@ -38,6 +43,17 @@ public class GameManager : MonoBehaviour
         {
             Spawner.Instance.Spawn();
         }
+
+        foreach (Enemy enemy in activeEnemies)
+        {
+            if (enemy.transform.position.z <= minDistance)
+            {
+                GameOver();
+            }
+        }
+
+        scoreText.text = "Score: " + score.ToString();
+        highscoreText.text = "Highscore: " + highScore.ToString();
     }
 
     public void IncreaseSpeed()
@@ -47,14 +63,14 @@ public class GameManager : MonoBehaviour
         enemySpeed = activeEnemies[0].moveSpeed;
         enemySpeed += 0.2f;
 
-        StartCoroutine(DoIncrease(1f, activeEnemies[0].moveSpeed, enemySpeed)); 
+        StartCoroutine(DoIncrease(1f, activeEnemies[0].moveSpeed, enemySpeed));
     }
 
     IEnumerator DoIncrease(float _overTime, float _currentValue, float _newValue)
     {
         float startTime = Time.time;
 
-        while(Time.time < (startTime + _overTime))
+        while (Time.time < (startTime + _overTime))
         {
             for (int i = 0; i < activeEnemies.Count; i++)
             {
